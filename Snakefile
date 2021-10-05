@@ -80,6 +80,11 @@ rule download_spacy_model:
 
 rule download_examples:
     output: "data/{split}.jsonl"
+    resources:
+        time_limit=ONE_HOUR * 8,
+        mem_mb=8000,
+        gpus=0,
+        log_dir="logs"
     shell: "wget -O {output} https://s3-eu-west-1.amazonaws.com/fever.public/feverous/{wildcards.split}.jsonl"
 
 
