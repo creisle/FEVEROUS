@@ -47,11 +47,12 @@ Then install the English Spacy model `python -m spacy download en_core_web_sm`.
 
 ### Install with Pip
 
-Set up a virtual environment and run the install via pip
+Set up a virtual environment and run the install via pip. PyTorch is installed first. The default install is given below but you may need to alter this depending on which GPU architecture you are running this on (See instructions [here](https://pytorch.org/get-started/locally/)).
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate
+pip install torch==1.7.0 torchvision==0.8.0 torchaudio==0.7.0
 pip install .
 ```
 
