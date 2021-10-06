@@ -10,6 +10,9 @@ logs/
 mlruns/
 models/
 .snakemake/
+custom_models
+screenlog.*
+.snakemake
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

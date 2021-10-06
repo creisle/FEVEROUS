@@ -95,7 +95,12 @@ rule download_db:
         mem_mb=DEFAULT_MEMORY_MB,
         gpus=1,
         log_dir="logs"
-    shell: "wget -O data/feverous-wiki-pages-db.zip https://s3-eu-west-1.amazonaws.com/fever.public/feverous/feverous-wiki-pages-db.zip; unzip data/feverous-wiki-pages-db.zip"
+    shell:
+        """
+        wget -O data/feverous-wiki-pages-db.zip https://s3-eu-west-1.amazonaws.com/fever.public/feverous/feverous-wiki-pages-db.zip;
+        cd data;
+        unzip feverous-wiki-pages-db.zip
+        """
 
 
 rule build_db:
@@ -106,7 +111,12 @@ rule build_db:
         mem_mb=DEFAULT_MEMORY_MB,
         gpus=1,
         log_dir="logs"
-    shell: PYTHON_EXE + " src/feverous/baseline/retriever/build_db.py --db_path {input} --save_path {output}"
+    shell: PYTHON_EXE
+        + """\
+        src/feverous/baseline/retriever/build_db.py \
+        --db_path {input} \
+        --save_path {output}
+        """
 
 
 rule build_tfidf:
@@ -117,7 +127,12 @@ rule build_tfidf:
         mem_mb=DEFAULT_MEMORY_MB,
         gpus=1,
         log_dir="logs"
-    shell: PYTHON_EXE + " src/feverous/baseline/retriever/build_tfidf.py --db_path {input} --out_dir {output}"
+    shell: PYTHON_EXE
+        + """\
+        src/feverous/baseline/retriever/build_tfidf.py \
+        --db_path {input} \
+        --out_dir {output}
+        """
 
 
 rule extract_k_docs:
@@ -130,7 +145,15 @@ rule extract_k_docs:
         mem_mb=DEFAULT_MEMORY_MB,
         gpus=1,
         log_dir="logs"
-    shell: PYTHON_EXE + " src/feverous/baseline/retriever/document_entity_tfidf_ir.py  --model '{input.index}' --db {input.db} --count 5 --split dev --data_path data/"
+    shell: PYTHON_EXE
+        + """\
+        src/feverous/baseline/retriever/document_entity_tfidf_ir.py  \
+        --model '{input.index}' \
+        --db {input.db} \
+        --count 5 \
+        --split dev \
+        --data_path data/
+        """
 
 
 rule extract_sentences:
@@ -142,7 +165,16 @@ rule extract_sentences:
         mem_mb=DEFAULT_MEMORY_MB,
         gpus=1,
         log_dir="logs"
-    shell: PYTHON_EXE + " src/feverous/baseline/retriever/sentence_tfidf_drqa.py --db {input.db} --split dev --max_page 5 --max_sent 5 --use_precomputed false --data_path data/"
+    shell: PYTHON_EXE
+        + """\
+        src/feverous/baseline/retriever/sentence_tfidf_drqa.py \
+        --db {input.db} \
+        --split dev \
+        --max_page 5 \
+        --max_sent 5 \
+        --use_precomputed false \
+        --data_path data/
+        """
 
 
 rule extract_tables:
@@ -154,7 +186,16 @@ rule extract_tables:
         mem_mb=DEFAULT_MEMORY_MB,
         gpus=1,
         log_dir="logs"
-    shell: PYTHON_EXE + " src/feverous/baseline/retriever/table_tfidf_drqa.py --db {input.db} --split dev --max_page 5 --max_tabs 3 --use_precomputed false --data_path data/"
+    shell: PYTHON_EXE
+        + """\
+        src/feverous/baseline/retriever/table_tfidf_drqa.py \
+        --db {input.db} \
+        --split dev \
+        --max_page 5 \
+        --max_tabs 3 \
+        --use_precomputed false \
+        --data_path data/
+        """
 
 
 rule combine_tables_and_sentences:
@@ -166,7 +207,15 @@ rule combine_tables_and_sentences:
         mem_mb=DEFAULT_MEMORY_MB,
         gpus=1,
         log_dir="logs"
-    shell: PYTHON_EXE + " src/feverous/baseline/retriever/combine_retrieval.py --data_path data --max_page 5 --max_sent 5 --max_tabs 3 --split dev"
+    shell: PYTHON_EXE
+        + """\
+        src/feverous/baseline/retriever/combine_retrieval.py \
+        --data_path data \
+        --max_page 5 \
+        --max_sent 5 \
+        --max_tabs 3 \
+        --split dev
+        """
 
 
 rule extract_table_cells:
@@ -179,7 +228,14 @@ rule extract_table_cells:
         mem_mb=DEFAULT_MEMORY_MB,
         gpus=1,
         log_dir="logs"
-    shell: PYTHON_EXE + " src/feverous/baseline/retriever/predict_cells_from_table.py --input_path {input.data} --max_sent 5 --wiki_path {input.db} --model_path {input.model}"
+    shell: PYTHON_EXE
+        + """\
+        src/feverous/baseline/retriever/predict_cells_from_table.py \
+        --input_path {input.data} \
+        --max_sent 5 \
+        --wiki_path {input.db} \
+        --model_path {input.model}
+        """
 
 
 rule evaluate_predictor:
@@ -192,4 +248,10 @@ rule evaluate_predictor:
         mem_mb=DEFAULT_MEMORY_MB,
         gpus=1,
         log_dir="logs"
-    shell: PYTHON_EXE + " src/feverous/baseline/predictor/evaluate_verdict_predictor.py --input_path {input.data} --wiki_path {input.db} --model_path {input.model}"
+    shell: PYTHON_EXE
+        + """\
+        src/feverous/baseline/predictor/evaluate_verdict_predictor.py \
+        --input_path {input.data} \
+        --wiki_path {input.db} \
+        --model_path {input.model}
+        """
